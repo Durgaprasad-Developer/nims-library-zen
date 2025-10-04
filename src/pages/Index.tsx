@@ -1,126 +1,179 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { Header } from "@/components/Header";
 import { BookCard, Book } from "@/components/BookCard";
 import { CartSidebar } from "@/components/CartSidebar";
 import { FilterSection } from "@/components/FilterSection";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/hooks/useAuth";
+import { Button } from "@/components/ui/button";
 
-// Sample book data
+// JEE & NEET focused book data
 const initialBooks: Book[] = [
   {
     id: "1",
-    title: "The Great Gatsby",
-    author: "F. Scott Fitzgerald",
-    isbn: "978-0-7432-7356-5",
-    category: "Literature",
-    coverImage: "https://images.unsplash.com/photo-1543002588-bfa74002ed7e?w=400&h=600&fit=crop",
+    title: "Concepts of Physics Vol. 1",
+    author: "H.C. Verma",
+    isbn: "978-8177091878",
+    category: "Physics",
+    subject: "Mechanics",
+    examType: "JEE",
+    difficulty: "Intermediate",
+    coverImage: "https://images.unsplash.com/photo-1532012197267-da84d127e765?w=400&h=600&fit=crop",
     status: "available",
+    description: "Complete guide to mechanics for JEE preparation",
   },
   {
     id: "2",
-    title: "To Kill a Mockingbird",
-    author: "Harper Lee",
-    isbn: "978-0-06-112008-4",
-    category: "Fiction",
-    coverImage: "https://images.unsplash.com/photo-1544947950-fa07a98d237f?w=400&h=600&fit=crop",
+    title: "NCERT Biology Class 11",
+    author: "NCERT",
+    isbn: "978-8174506948",
+    category: "Biology",
+    subject: "Cell Biology",
+    examType: "NEET",
+    difficulty: "Basic",
+    coverImage: "https://images.unsplash.com/photo-1532187643603-ba119ca4109e?w=400&h=600&fit=crop",
     status: "available",
+    description: "Foundation for NEET Biology preparation",
   },
   {
     id: "3",
-    title: "1984",
-    author: "George Orwell",
-    isbn: "978-0-452-28423-4",
-    category: "Fiction",
-    coverImage: "https://images.unsplash.com/photo-1512820790803-83ca734da794?w=400&h=600&fit=crop",
+    title: "Organic Chemistry",
+    author: "Morrison and Boyd",
+    isbn: "978-0136436690",
+    category: "Chemistry",
+    subject: "Organic Chemistry",
+    examType: "Both",
+    difficulty: "Advanced",
+    coverImage: "https://images.unsplash.com/photo-1603126857599-f6e157fa2fe6?w=400&h=600&fit=crop",
     status: "borrowed",
     dueDate: "2025-10-15",
+    description: "Advanced organic chemistry concepts",
   },
   {
     id: "4",
-    title: "Sapiens: A Brief History",
-    author: "Yuval Noah Harari",
-    isbn: "978-0-06-231609-7",
-    category: "History",
-    coverImage: "https://images.unsplash.com/photo-1495446815901-a7297e633e8d?w=400&h=600&fit=crop",
+    title: "Problems in Calculus",
+    author: "I.A. Maron",
+    isbn: "978-9388511520",
+    category: "Mathematics",
+    subject: "Calculus",
+    examType: "JEE",
+    difficulty: "Advanced",
+    coverImage: "https://images.unsplash.com/photo-1509228468518-180dd4864904?w=400&h=600&fit=crop",
     status: "available",
+    description: "Advanced calculus problems for JEE Advanced",
   },
   {
     id: "5",
-    title: "Clean Code",
-    author: "Robert C. Martin",
-    isbn: "978-0-13-235088-4",
-    category: "Technology",
-    coverImage: "https://images.unsplash.com/photo-1532012197267-da84d127e765?w=400&h=600&fit=crop",
+    title: "NCERT Physics Class 12",
+    author: "NCERT",
+    isbn: "978-8174507204",
+    category: "Physics",
+    subject: "Electromagnetism",
+    examType: "Both",
+    difficulty: "Basic",
+    coverImage: "https://images.unsplash.com/photo-1636466497217-26a8cbeaf0aa?w=400&h=600&fit=crop",
     status: "reserved",
+    description: "Essential physics concepts for competitive exams",
   },
   {
     id: "6",
-    title: "The Lean Startup",
-    author: "Eric Ries",
-    isbn: "978-0-307-88789-4",
-    category: "Non-Fiction",
-    coverImage: "https://images.unsplash.com/photo-1589998059171-988d887df646?w=400&h=600&fit=crop",
+    title: "Trueman's Biology Vol. 1",
+    author: "K.N. Bhatia",
+    isbn: "978-9388031585",
+    category: "Biology",
+    subject: "Zoology",
+    examType: "NEET",
+    difficulty: "Intermediate",
+    coverImage: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=600&fit=crop",
     status: "available",
+    description: "Comprehensive zoology for NEET",
   },
   {
     id: "7",
-    title: "A Brief History of Time",
-    author: "Stephen Hawking",
-    isbn: "978-0-553-10953-5",
-    category: "Science",
-    coverImage: "https://images.unsplash.com/photo-1541963463532-d68292c34b19?w=400&h=600&fit=crop",
+    title: "Physical Chemistry",
+    author: "O.P. Tandon",
+    isbn: "978-9386320902",
+    category: "Chemistry",
+    subject: "Physical Chemistry",
+    examType: "Both",
+    difficulty: "Intermediate",
+    coverImage: "https://images.unsplash.com/photo-1554415707-6e8cfc93fe23?w=400&h=600&fit=crop",
     status: "borrowed",
     dueDate: "2025-10-20",
+    description: "Complete physical chemistry guide",
   },
   {
     id: "8",
-    title: "Pride and Prejudice",
-    author: "Jane Austen",
-    isbn: "978-0-14-143951-8",
-    category: "Literature",
-    coverImage: "https://images.unsplash.com/photo-1524995997946-a1c2e315a42f?w=400&h=600&fit=crop",
+    title: "Concepts of Physics Vol. 2",
+    author: "H.C. Verma",
+    isbn: "978-8177093315",
+    category: "Physics",
+    subject: "Modern Physics",
+    examType: "JEE",
+    difficulty: "Advanced",
+    coverImage: "https://images.unsplash.com/photo-1589998059171-988d887df646?w=400&h=600&fit=crop",
     status: "available",
+    description: "Advanced physics topics for JEE",
   },
   {
     id: "9",
-    title: "The Art of War",
-    author: "Sun Tzu",
-    isbn: "978-1-59030-426-1",
-    category: "History",
-    coverImage: "https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=400&h=600&fit=crop",
+    title: "Objective NCERT Biology",
+    author: "MTG Editorial",
+    isbn: "978-9389167849",
+    category: "Biology",
+    subject: "Botany",
+    examType: "NEET",
+    difficulty: "Basic",
+    coverImage: "https://images.unsplash.com/photo-1516979187457-637abb4f9353?w=400&h=600&fit=crop",
     status: "available",
+    description: "NCERT-based objective questions",
   },
   {
     id: "10",
-    title: "Thinking, Fast and Slow",
-    author: "Daniel Kahneman",
-    isbn: "978-0-374-27563-1",
-    category: "Non-Fiction",
-    coverImage: "https://images.unsplash.com/photo-1550399105-c4db5fb85c18?w=400&h=600&fit=crop",
+    title: "Coordinate Geometry",
+    author: "S.L. Loney",
+    isbn: "978-9387663510",
+    category: "Mathematics",
+    subject: "Coordinate Geometry",
+    examType: "JEE",
+    difficulty: "Advanced",
+    coverImage: "https://images.unsplash.com/photo-1635070041078-e363dbe005cb?w=400&h=600&fit=crop",
     status: "available",
+    description: "Classic coordinate geometry text",
   },
   {
     id: "11",
-    title: "The Catcher in the Rye",
-    author: "J.D. Salinger",
-    isbn: "978-0-316-76948-0",
-    category: "Fiction",
-    coverImage: "https://images.unsplash.com/photo-1516979187457-637abb4f9353?w=400&h=600&fit=crop",
+    title: "GRB Organic Chemistry",
+    author: "Dr. O.P. Agarwal",
+    isbn: "978-9387158283",
+    category: "Chemistry",
+    subject: "Organic Chemistry",
+    examType: "JEE",
+    difficulty: "Advanced",
+    coverImage: "https://images.unsplash.com/photo-1532012197267-da84d127e765?w=400&h=600&fit=crop",
     status: "borrowed",
     dueDate: "2025-10-18",
+    description: "Advanced organic chemistry problems",
   },
   {
     id: "12",
-    title: "Introduction to Algorithms",
-    author: "Thomas H. Cormen",
-    isbn: "978-0-262-03384-8",
-    category: "Technology",
-    coverImage: "https://images.unsplash.com/photo-1485988412941-77a35537dae4?w=400&h=600&fit=crop",
+    title: "Biology Vol. 1",
+    author: "Pradeep Publications",
+    isbn: "978-8178079042",
+    category: "Biology",
+    subject: "Cell Biology & Genetics",
+    examType: "NEET",
+    difficulty: "Intermediate",
+    coverImage: "https://images.unsplash.com/photo-1576086213369-97a306d36557?w=400&h=600&fit=crop",
     status: "available",
+    description: "Detailed biology for NEET aspirants",
   },
 ];
 
 const Index = () => {
+  const navigate = useNavigate();
+  const { user, userRole, loading, signOut } = useAuth();
   const [books, setBooks] = useState<Book[]>(initialBooks);
   const [cartItems, setCartItems] = useState<Book[]>([]);
   const [isCartOpen, setIsCartOpen] = useState(false);
@@ -128,6 +181,24 @@ const Index = () => {
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [selectedStatus, setSelectedStatus] = useState("All");
   const { toast } = useToast();
+
+  useEffect(() => {
+    if (!loading && !user) {
+      navigate("/auth");
+    }
+  }, [user, loading, navigate]);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <p className="text-lg">Loading...</p>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return null;
+  }
 
   const handleBorrow = (bookId: string) => {
     const book = books.find(b => b.id === bookId);
@@ -238,6 +309,20 @@ const Index = () => {
         onCartClick={() => setIsCartOpen(true)}
         onSearchChange={setSearchQuery}
       />
+      
+      <div className="container px-4 pt-4">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <p className="text-sm text-muted-foreground">
+              Welcome, <span className="font-semibold text-foreground">{user.email}</span>
+            </p>
+            <span className="text-xs px-2 py-1 rounded-full bg-primary/10 text-primary">
+              {userRole === "teacher" ? "Teacher/Admin" : "Student"}
+            </span>
+          </div>
+          <Button variant="outline" onClick={signOut}>Sign Out</Button>
+        </div>
+      </div>
 
       <main className="container px-4 md:px-6 py-8">
         {/* Hero Section */}
