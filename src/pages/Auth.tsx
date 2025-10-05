@@ -48,7 +48,7 @@ const Auth = () => {
   return (
     <div className="min-h-screen relative flex items-center justify-center p-4">
       <div 
-        className="absolute inset-0 bg-cover bg-center opacity-20"
+        className="absolute inset-0 bg-cover bg-center opacity-10"
         style={{ backgroundImage: `url(${nimsBuilding})` }}
       />
       <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-secondary/10 to-background" />
