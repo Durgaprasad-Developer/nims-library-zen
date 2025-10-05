@@ -182,6 +182,21 @@ const Index = () => {
   const [selectedStatus, setSelectedStatus] = useState("All");
   const { toast } = useToast();
 
+  // Move useMemo before early returns to follow Rules of Hooks
+  const filteredBooks = useMemo(() => {
+    return books.filter(book => {
+      const matchesSearch = 
+        book.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        book.author.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        book.isbn.includes(searchQuery);
+      
+      const matchesCategory = selectedCategory === "All" || book.category === selectedCategory;
+      const matchesStatus = selectedStatus === "All" || book.status === selectedStatus.toLowerCase();
+
+      return matchesSearch && matchesCategory && matchesStatus;
+    });
+  }, [books, searchQuery, selectedCategory, selectedStatus]);
+
   useEffect(() => {
     if (!loading && !user) {
       navigate("/auth");
@@ -287,20 +302,6 @@ const Index = () => {
       description: `You've borrowed ${availableInCart.length} ${availableInCart.length === 1 ? "book" : "books"}. Due in 14 days.`,
     });
   };
-
-  const filteredBooks = useMemo(() => {
-    return books.filter(book => {
-      const matchesSearch = 
-        book.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        book.author.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        book.isbn.includes(searchQuery);
-      
-      const matchesCategory = selectedCategory === "All" || book.category === selectedCategory;
-      const matchesStatus = selectedStatus === "All" || book.status === selectedStatus.toLowerCase();
-
-      return matchesSearch && matchesCategory && matchesStatus;
-    });
-  }, [books, searchQuery, selectedCategory, selectedStatus]);
 
   return (
     <div className="min-h-screen bg-background">
