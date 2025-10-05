@@ -8,6 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useAuth } from "@/hooks/useAuth";
 import nimsLogo from "@/assets/nims-logo.png";
+import nimsBuilding from "@/assets/nims-building.png";
 
 const Auth = () => {
   const navigate = useNavigate();
@@ -45,8 +46,13 @@ const Auth = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-primary/10 via-secondary/10 to-background flex items-center justify-center p-4">
-      <Card className="w-full max-w-md">
+    <div className="min-h-screen relative flex items-center justify-center p-4">
+      <div 
+        className="absolute inset-0 bg-cover bg-center opacity-20"
+        style={{ backgroundImage: `url(${nimsBuilding})` }}
+      />
+      <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-secondary/10 to-background" />
+      <Card className="w-full max-w-md relative z-10">
         <CardHeader className="text-center">
           <img src={nimsLogo} alt="NIMS Logo" className="h-16 mx-auto mb-4" />
           <CardTitle className="text-2xl">NIMS Library Portal</CardTitle>
