@@ -11,9 +11,13 @@ export interface Book {
   author: string;
   isbn: string;
   category: string;
+  subject: string;
+  examType: "JEE" | "NEET" | "Both";
+  difficulty: "Basic" | "Intermediate" | "Advanced";
   coverImage: string;
   status: BookStatus;
   dueDate?: string;
+  description: string;
 }
 
 interface BookCardProps {
